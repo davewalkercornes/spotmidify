@@ -1,0 +1,14 @@
+.pytest_cache
+.env
+.venvs
+.sam
+.layer
+**.venv
+
+**__pycache__/
+*.pyc
+
+**node_modules
+tmp
+
+.build
