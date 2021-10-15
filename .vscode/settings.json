@@ -1,0 +1,63 @@
+{
+    // Pretty documentation strings
+    "autoDocstring.docstringFormat": "numpy",
+    // Makes it easier to code
+    "python.autoComplete.addBrackets": true,
+    // Language, highlighting & analysis
+    "python.analysis.completeFunctionParens": true,
+    "python.languageServer": "Pylance",
+    // Common files need to be included
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}\\stack\\src\\lib",
+    ],
+    // Common files need to be included
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}\\stack\\src\\lib"
+    ],
+    // Some good linting settings
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.pylintPath": "pylint",
+    // Common files need to be included
+    // "python.linting.pylintArgs": [
+    //     "--init-hook",
+    //     "import sys; sys.path.append('${workspaceFolder}\\stack\\src');"
+    // ],
+    // Automatic formatting
+    "python.formatting.provider": "black",
+    "yaml.customTags": [
+        "!Equals sequence",
+        "!FindInMap sequence",
+        "!GetAtt",
+        "!GetAZs",
+        "!ImportValue",
+        "!Join sequence",
+        "!Ref",
+        "!Select sequence",
+        "!Split sequence",
+        "!Sub",
+        "!And",
+        "!And sequence",
+        "!If",
+        "!If sequence",
+        "!Not",
+        "!Not sequence",
+        "!Equals",
+        "!Or",
+        "!Or sequence",
+        "!FindInMap",
+        "!Base64",
+        "!Join",
+        "!Cidr",
+        "!Sub sequence",
+        "!ImportValue sequence",
+        "!Select",
+        "!Split"
+    ],
+    "atlascode.jira.startWorkBranchTemplate.customPrefixes": [
+        "feature/",
+        "issue/",
+        "chore/"
+    ]
+}

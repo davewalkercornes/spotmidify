@@ -1,0 +1,55 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File in Local Environment",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}\\stack\\src\\lib"
+            }
+        },
+        {
+            "name": "Python: Current File in Virtual Environment",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "python": "${fileDirname}/../.venv/Scripts/python.exe",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}\\stack\\src\\lib"
+            }
+        },
+        {
+            "name": "Lambda Paython: Current File in Lambda Container",
+            "type": "python",
+            "request": "attach",
+            "port": 5890,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${fileDirname}",
+                    "remoteRoot": "/var/task"
+                }
+            ],
+            "preLaunchTask": "Launch SAM Container",
+            "postDebugTask": "Destroy SAM Container"
+        },
+        {
+            "name": "Python: Current File + LIBRARIES in Local Environment",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}\\stack\\src\\lib"
+            },
+            "justMyCode": false
+        }
+    ]
+}

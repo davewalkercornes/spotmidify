@@ -1,0 +1,80 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Setup SELECTED virtual environment",
+            "type": "process",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}${pathSeparator}tools${pathSeparator}venv_manager.py",
+                "${workspaceFolder}",
+                "${relativeFileDirname}",
+                "${relativeFileDirname}"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Reset SELECTED virtual environment",
+            "type": "process",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}${pathSeparator}tools${pathSeparator}venv_manager.py",
+                "-f",
+                "${workspaceFolder}",
+                "${relativeFileDirname}",
+                "${relativeFileDirname}"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": "build"
+        },
+        {
+            "label": "Launch SAM Container",
+            "type": "process",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}${pathSeparator}tools${pathSeparator}sam_launcher.py",
+                "${workspaceFolder}",
+                "${relativeFileDirname}",
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Destroy SAM Container",
+            "type": "shell",
+            "command": "docker ps -all | grep samcli/lambda | awk '{print $1}' | xargs docker rm -f",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        }
+    ]
+}
