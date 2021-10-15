@@ -2,6 +2,7 @@ import time
 import asyncio
 from typing import List
 import statistics
+import numpy as np
 
 
 import spotipy
@@ -47,6 +48,7 @@ class spotifyMonitor:
         self.sp = self._generate_spotify_auth()
         self.on_track_change = EventHook()
         self.on_section_change = EventHook()
+        self.on_stop = EventHook()
         self.current_track = {"id": None, "progress": 0.0, "sections": []}
         self.current_section = {"id": None, "track_id": None}
         self.next_section = {"id": None, "track_id": None}
@@ -97,7 +99,10 @@ class spotifyMonitor:
             elif delay < self.config.refresh_accuracy_seconds:
                 delay = self.config.refresh_accuracy_seconds
         except NotPlayingError:
-            self._playing = False
+            if self._playing:
+                self._playing = False
+                self.on_stop.fire()
+
             delay = 5
             if self.debug:
                 print("         Refresh (not playing)")
@@ -105,40 +110,33 @@ class spotifyMonitor:
         self._loop.call_later(delay=delay, callback=self._refresh)
 
     def _tick(self):
-        this_tick = self._get_tick_time()
-        self.current_track["progress"] += (this_tick - self._last_tick) / 1000
-        self._last_tick = this_tick
-        if self.debug:
-            print("         Tick {}".format(self.current_track["progress"]))
-
-        current_section_id = self._calculate_current_section_id(self.current_track)
-
-        if current_section_id != self.current_section["id"]:
-            section_info = self._calculate_section_info(
-                self.current_track, current_section_id
-            )
-            self._trigger_section_change(section_info)
-            self.current_section = section_info["current_section"]
-            self.next_section = section_info["next_section"]
-
-        delay = (
-            self.next_section["start"] - self.current_track["progress"]
-        ) / self.config.tick_next_event_divisor
-        if delay > self.config.tick_max_delay_seconds:
-            delay = self.config.tick_max_delay_seconds
-        elif delay < self.config.tick_accuracy_seconds:
-            delay = self.next_section["start"] - self.current_track["progress"]
-
-        if delay < 0:
-            delay = self.config.tick_accuracy_seconds
-
-        # print(
-        #     "         ...delay {} ({} {})".format(
-        #         delay, self.next_section["start"], self.current_track["progress"]
-        #     )
-        # )
-
         if self._playing:
+            this_tick = self._get_tick_time()
+            self.current_track["progress"] += (this_tick - self._last_tick) / 1000
+            self._last_tick = this_tick
+            if self.debug:
+                print("         Tick {}".format(self.current_track["progress"]))
+
+            current_section_id = self._calculate_current_section_id(self.current_track)
+
+            if current_section_id != self.current_section["id"]:
+                section_info = self._calculate_section_info(
+                    self.current_track, current_section_id
+                )
+                self._trigger_section_change(self.current_track, section_info)
+                self.current_section = section_info["current_section"]
+                self.next_section = section_info["next_section"]
+
+            delay = (
+                self.next_section["start"] - self.current_track["progress"]
+            ) / self.config.tick_next_event_divisor
+            if delay > self.config.tick_max_delay_seconds:
+                delay = self.config.tick_max_delay_seconds
+            elif delay < self.config.tick_accuracy_seconds:
+                delay = self.next_section["start"] - self.current_track["progress"]
+
+            if delay < 0:
+                delay = self.config.tick_accuracy_seconds
             self._loop.call_later(delay=delay, callback=self._tick)
         else:
             self._ticking = False
@@ -160,7 +158,7 @@ class spotifyMonitor:
         if track_change:
             self._trigger_track_change(current_track, section_info)
         elif section_change:
-            self._trigger_section_change(section_info)
+            self._trigger_section_change(current_track, section_info)
 
         self.current_track = current_track
         self._last_tick = self._get_tick_time()
@@ -175,9 +173,9 @@ class spotifyMonitor:
             next_section=section_info["next_section"],
         )
 
-    def _trigger_section_change(self, section_info):
+    def _trigger_section_change(self, track, section_info):
         self.on_section_change.fire(
-            previous_section=self.current_section,
+            current_track=track,
             current_section=section_info["current_section"],
             next_section=section_info["next_section"],
         )
@@ -271,10 +269,8 @@ class spotifyMonitor:
                 "loudness": result["track"]["loudness"],
                 "key": result["track"]["key"],
                 "sections": result["sections"],
-                "sections_loudness_max": max(loudnesses),
-                "sections_loudness_min": min(loudnesses),
-                "sections_loudness_mean": statistics.mean(loudnesses),
-                "sections_loudness_stdev": statistics.stdev(loudnesses),
+                "sections_loudness_mean": np.mean(loudnesses),
+                "sections_loudness_upperq": np.quantile(loudnesses, 0.75),
             }
         # FIXME - Add 401 error here
         except ValueError:
