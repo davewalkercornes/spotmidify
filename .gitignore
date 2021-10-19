@@ -4,6 +4,7 @@
 .sam
 .layer
 **.venv
+.cache
 
 **__pycache__/
 *.pyc
