@@ -1,8 +1,6 @@
 import copy
 import random
-from datetime import time
-
-from numpy import nextafter
+from datetime import datetime
 
 from spotify import spotifyMonitor
 from midi import midiControl, midiChange
@@ -59,7 +57,14 @@ def handle_track_change(
     previous_track: dict, current_track: dict, current_section: dict, next_section: dict
 ):
     this_change = midi.generate_random_change()
-    this_change.set_speed(calculate_is_slow(current_track, current_section))
+    if current_track["name"] == "How Long Will I Love You - Bonus Track":
+        this_change.set_color(0)
+        this_change.gobo_index = 0
+        this_change.set_optics(0)
+        this_change.set_movement(0)
+        this_change.set_speed(True)
+    else:
+        this_change.set_speed(calculate_is_slow(current_track, current_section))
     midi.set_change(this_change)
     handle_section_change(current_track, current_section, next_section)
 
@@ -75,7 +80,7 @@ def handle_section_change(
 
 
 def handle_stop():
-    pass
+    midi.set_background_state()
 
 
 def calculate_is_slow(track: dict, section: dict) -> bool:
@@ -89,6 +94,7 @@ def calculate_is_slow(track: dict, section: dict) -> bool:
     if section_loudness < -10:
         is_slow = True
     elif section_loudness < track["loudness"] - 2.5:
+        is_slow = True
         is_slow = True
     else:
         is_slow = False
@@ -109,6 +115,9 @@ def midi_change_from_section(
     change = copy.deepcopy(base_change)
     change.tempo = section["tempo"]
 
+    if track["name"] == "How Long Will I Love You - Bonus Track":
+        return change
+
     change.set_speed(calculate_is_slow(track, section))
     if change.is_slow != base_change.is_slow:
         # If speed has changed then just leave it at that
@@ -117,25 +126,23 @@ def midi_change_from_section(
     if change.is_slow:
         # If slow either change optics or gobo
         if random.randint(1, 2) == 1:
-            change.optics_index = midi.generate_random_index("optics")
+            change.set_optics(midi.generate_random_index("optics"))
         else:
             change.gobo_index = midi.generate_random_index("gobo")
         return change
 
-    if (
-        section["loudness"] > track["sections_loudness_upperq"]
-        and previous_section["loudness"] < track["sections_loudness_upperq"]
-    ):
+    if random.randint(1, 2) == 1:
         change.set_movement(midi.generate_random_index("movement"))
+        change.gobo_index = midi.generate_random_index("gobo")
     else:
-        change.optics_index = midi.generate_random_index("optics")
+        change.set_optics(midi.generate_random_index("optics"))
         change.gobo_index = midi.generate_random_index("gobo")
     return change
 
 
 monitor = spotifyMonitor()
 midi = midiControl()
-random.seed(time.microsecond)
+random.seed(datetime.now().time().microsecond)
 
 if __name__ == "__main__":
     start()

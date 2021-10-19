@@ -56,7 +56,7 @@ class spotifyMonitor:
         self._last_tick = self._get_tick_time()
         self.debug = debug
         self._ticking = False
-        self._playing = False
+        self._playing = True
 
     def start(self):
         try:
