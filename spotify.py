@@ -275,3 +275,41 @@ class spotifyMonitor:
         # FIXME - Add 401 error here
         except ValueError:
             return {"tempo": None, "loudness": None, "sections": List()}
+
+    def _get_spotify_track_features(self, track_id) -> dict:
+        try:
+            result = self.sp.audio_features(tracks=[track_id])
+            return {
+                "danceability": result[0]["danceability"],
+                "energy": result[0]["energy"],
+                "key": result[0]["key"],
+                "loudness": result[0]["loudness"],
+                "speechiness": result[0]["speechiness"],
+                "acousticness": result[0]["acousticness"],
+                "instrumentalness": result[0]["instrumentalness"],
+                "liveness": result[0]["liveness"],
+                "valence": result[0]["valence"],
+                "tempo": result[0]["tempo"],
+                "time_signature": result[0]["time_signature"],
+            }
+        # FIXME - Add 401 error here
+        except ValueError:
+            return {"tempo": None, "loudness": None, "sections": List()}
+
+    def _get_playlist(self, playlist_id) -> dict:
+        try:
+            result = self.sp.playlist(playlist_id=playlist_id)
+            tracks = []
+            for item in result["tracks"]["items"]:
+                tracks.append(
+                    {
+                        "playlist_name": result["name"],
+                        "playlist_id": result["id"],
+                        "id": item["track"]["id"],
+                        "name": item["track"]["name"],
+                        "duration": item["track"]["duration_ms"] / 1000,
+                    }
+                )
+            return tracks
+        except ValueError:
+            return []
