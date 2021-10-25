@@ -105,60 +105,53 @@ class midiControl:
         self._reset_sub(1, offset)
 
     def do_change(self):
-        print(
-            "      LX Change color {} gobo {} optics {} movement {}".format(
-                self.change.color_setting,
-                self.change.gobo_index,
-                self.change.optics_setting,
-                self.change.move_setting,
-            )
-        )
         if self._color_changed or self._stopped:
             self._run_sub(MIDI_SUB_COLOR)
+            print("      LX color {}".format(self.change.color_setting))
         if self._gobo_changed or self._stopped:
             self._run_sub(MIDI_SUB_GOBO)
+            print("      LX gobo {}".format(self.change.gobo_index))
         if self._optics_changed or self._stopped:
             self._run_sub(MIDI_SUB_OPTICS)
+            print("      LX optics {}".format(self.change.optics_setting))
         if self._movement_changed or self._stopped:
             self._run_sub(MIDI_SUB_MOVEMENT)
+            print("      LX movement {}".format(self.change.move_setting))
         if self._stopped:
             self._stop_sub(MIDI_SUB_BACKGROUND)
             self._stopped = False
+            print("      LX background set")
 
     def set_change(self, change: midiChange):
         if self.change.color_setting != change.color_setting:
             self._reset_sub(QUANTITY_COLOR * 2, MIDI_SUB_COLOR)
             self._set_sub(change.color_setting, MIDI_SUB_COLOR)
             self._color_changed = True
+            print("      (prep lx color {})".format(change.color_setting))
         else:
             self._color_changed = False
         if self.change.gobo_index != change.gobo_index:
             self._reset_sub(QUANTITY_GOBO, MIDI_SUB_GOBO)
             self._set_sub(change.gobo_index, MIDI_SUB_GOBO)
             self._gobo_changed = True
+            print("      (prep lx gobo {})".format(change.gobo_index))
         else:
             self._gobo_changed = False
         if self.change.optics_setting != change.optics_setting:
             self._reset_sub(QUANTITY_OPTICS * 2, MIDI_SUB_OPTICS)
             self._set_sub(change.optics_setting, MIDI_SUB_OPTICS)
             self._optics_changed = True
+            print("      (prep lx optics {})".format(change.optics_setting))
         else:
             self._optics_changed = False
         if self.change.move_setting != change.move_setting:
             self._reset_sub(QUANTITY_MOVEMENT * 2, MIDI_SUB_MOVEMENT)
             self._set_sub(change.move_setting, MIDI_SUB_MOVEMENT)
             self._movement_changed = True
+            print("      (prep lx movement {})".format(change.move_setting))
         else:
             self._movement_changed = False
         self.change = change
-        print(
-            "      [Prep change color {} gobo {} optics {} movement {}]".format(
-                self.change.color_setting,
-                self.change.gobo_index,
-                self.change.optics_setting,
-                self.change.move_setting,
-            )
-        )
 
     def set_background_state(self):
         self._run_sub(MIDI_SUB_BACKGROUND)

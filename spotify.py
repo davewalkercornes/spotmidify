@@ -1,7 +1,7 @@
 import time
 import asyncio
 from typing import List
-import statistics
+import threading
 import numpy as np
 
 
@@ -166,26 +166,33 @@ class spotifyMonitor:
         self.next_section = section_info["next_section"]
 
     def _trigger_track_change(self, track, section_info):
-        self.on_track_change.fire(
-            previous_track=self.current_track,
-            current_track=track,
-            current_section=section_info["current_section"],
-            next_section=section_info["next_section"],
+        nth = threading.Thread(
+            target=self.on_track_change.fire(
+                previous_track=self.current_track,
+                current_track=track,
+                current_section=section_info["current_section"],
+                next_section=section_info["next_section"],
+            )
         )
+        nth.start()
 
     def _trigger_section_change(self, track, section_info):
-        self.on_section_change.fire(
-            current_track=track,
-            current_section=section_info["current_section"],
-            next_section=section_info["next_section"],
+        nth = threading.Thread(
+            target=self.on_section_change.fire(
+                current_track=track,
+                current_section=section_info["current_section"],
+                next_section=section_info["next_section"],
+            )
         )
+        nth.start()
 
     def _get_current_track_status(self) -> dict:
         track = self._get_spotify_currently_playing()
 
         if track["id"] != self.current_track["id"]:
             track_info = self._get_spotify_track_info(track_id=track["id"])
-            current_track = {**track, **track_info}
+            track_features = self._get_spotify_track_features(track_id=track["id"])
+            current_track = {**track, **track_info, **track_features}
         else:
             current_track = self.current_track
             current_track["progress"] = track["progress"]

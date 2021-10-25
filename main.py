@@ -84,10 +84,13 @@ def handle_stop():
 
 
 def calculate_is_slow(track: dict, section: dict) -> bool:
-    if "sections_loudness_mean" in ["track"]:
-        mean_loudness = track["sections_loudness_mean"]
-    else:
-        mean_loudness = track["loudness"]
+    if track["energy"] < 0.4:
+        return True
+
+    # if "sections_loudness_mean" in ["track"]:
+    #     mean_loudness = track["sections_loudness_mean"]
+    # else:
+    #     mean_loudness = track["loudness"]
 
     section_loudness = section["loudness"] or -100
 
@@ -115,7 +118,7 @@ def midi_change_from_section(
     change = copy.deepcopy(base_change)
     change.tempo = section["tempo"]
 
-    if track["name"] == "How Long Will I Love You - Bonus Track":
+    if track["energy"] < 0.4:
         return change
 
     change.set_speed(calculate_is_slow(track, section))
